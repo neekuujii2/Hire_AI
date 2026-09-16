@@ -1,0 +1,195 @@
+version: "3.9"
+
+# HireAI Production Stack
+# -----------------------
+# 20 interview-agent replicas + 3 queue workers + Redis with persistence.
+# Usage: docker compose -f docker-compose.prod.yml up -d
+
+x-agent-base: &agent-base
+  build:
+    context: .
+    dockerfile: apps/agent/Dockerfile
+    target: worker
+  env_file: .env
+  depends_on:
+    redis:
+      condition: service_healthy
+    agent-api:
+      condition: service_healthy
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        cpus: "1.0"
+        memory: 1G
+      reservations:
+        cpus: "0.5"
+        memory: 512M
+
+x-agent-api-base: &agent-api-base
+  build:
+    context: .
+    dockerfile: apps/agent/Dockerfile
+    target: api
+  env_file: .env
+  depends_on:
+    redis:
+      condition: service_healthy
+    lightrag:
+      condition: service_healthy
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        cpus: "1.5"
+        memory: 2G
+      reservations:
+        cpus: "0.75"
+        memory: 1G
+
+services:
+  # ---------------------------------------------------------------------------
+  # Infrastructure
+  # ---------------------------------------------------------------------------
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2.5G
+
+  # ---------------------------------------------------------------------------
+  # Knowledge sidecar
+  # ---------------------------------------------------------------------------
+
+  lightrag:
+    build:
+      context: .
+      dockerfile: services/lightrag/Dockerfile
+    ports:
+      - "9621:9621"
+    volumes:
+      - lightrag-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9621/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    profiles:
+      - ""
+
+  # ---------------------------------------------------------------------------
+  # Agent API (prep, score, health)
+  # ---------------------------------------------------------------------------
+
+  agent-api:
+    <<: *agent-api-base
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 3G
+
+  # ---------------------------------------------------------------------------
+  # Interview agents (20 replicas for 500 concurrent rooms)
+  # ---------------------------------------------------------------------------
+
+  interview-agent:
+    <<: *agent-base
+    command: python -m deepinterview_agent.worker start
+    environment:
+      - LIVEKIT_URL=${LIVEKIT_URL}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+    deploy:
+      replicas: 20
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+      placement:
+        max_replicas_per_node: 5
+
+  # ---------------------------------------------------------------------------
+  # Queue workers (3 replicas, concurrency 25 each = 75 total)
+  # ---------------------------------------------------------------------------
+
+  prep-worker:
+    <<: *agent-base
+    command: node services/queue/workers/prep-worker.js
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - AGENT_API_URL=http://agent-api:8000
+      - WEB_API_URL=http://web:3000
+      - INTERNAL_API_SECRET=${INTERNAL_API_SECRET:-}
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  # ---------------------------------------------------------------------------
+  # Web (Next.js)
+  # ---------------------------------------------------------------------------
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      agent-api:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+
+volumes:
+  redis-data:
+    driver: local
+  lightrag-data:
+    driver: local
