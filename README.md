@@ -1,15 +1,15 @@
 <div align="center">
 
-<img src="assets/logo.svg" width="132" alt="DeepInterview" />
+<img src="assets/logo.svg" width="132" alt="Hire AI" />
 
-# DeepInterview: Voice-First, Multilingual AI Mock Interviewer
+# Hire_AI: Voice-First, Multilingual AI Mock Interviewer
 
 ### Practice the interview out loud. Then pass the real one. · Multi-agent · Open source
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-4338CA.svg)](LICENSE)
-[![Build](https://img.shields.io/github/actions/workflow/status/ngoanpv/DeepInterview/ci.yml?branch=main&label=build)](https://github.com/ngoanpv/DeepInterview/actions)
-[![Release](https://img.shields.io/github/v/release/ngoanpv/DeepInterview?include_prereleases&label=release&color=4338CA)](https://github.com/ngoanpv/DeepInterview/releases)
-[![Stars](https://img.shields.io/github/stars/ngoanpv/DeepInterview?style=social)](https://github.com/ngoanpv/DeepInterview/stargazers)
+[![Build](https://img.shields.io/github/actions/workflow/status/neekuujii2/Hire_AI/ci.yml?branch=main&label=build)](https://github.com/neekuujii2/Hire_AI/actions)
+[![Release](https://img.shields.io/github/v/release/neekuujii2/Hire_AI?include_prereleases&label=release&color=4338CA)](https://github.com/neekuujii2/Hire_AI/releases)
+[![Stars](https://img.shields.io/github/stars/neekuujii2/Hire_AI?style=social)](https://github.com/neekuujii2/Hire_AI/stargazers)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-4338CA.svg)](apps/agent)
 [![pnpm](https://img.shields.io/badge/pnpm-workspace-4338CA.svg)](pnpm-workspace.yaml)
 [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/fT7Ecbyq)
@@ -19,16 +19,16 @@
 
 **English** · [Tiếng Việt](README.vi.md)
 
-[Quickstart](#quickstart) · [Why](#why-deepinterview) · [Features](#features) · [Architecture](#architecture) · [Community](#community) · [Contributing](#contributing)
+[Quickstart](#quickstart) · [Why](#why-Hire_Ai) · [Features](#features) · [Architecture](#architecture) · [Community](#community) · [Contributing](#contributing)
 
-**Contributions wanted** — [interview question-bank packs](https://github.com/ngoanpv/DeepInterview/issues/38) · [language packs & provider adapters](docs/GOOD_FIRST_ISSUES.md) · your packs get asked in real interviews, and no API keys are needed to develop.
+**Contributions wanted** — [interview question-bank packs](https://github.com/neekuujii2/Hire_AI/issues/) · [language packs & provider adapters](docs/GOOD_FIRST_ISSUES.md) · your packs get asked in real interviews, and no API keys are needed to develop.
 
 </div>
 
 ---
 
 <!-- HERO: live voice interview → scored report, recorded from the real app. -->
-![DeepInterview demo — a live voice interview with streaming captions, then the scored report](assets/demo.gif)
+![Hire AI demo — a live voice interview with streaming captions, then the scored report](assets/demo.gif)
 
 > **Upload your CV and a job description. Talk to an AI interviewer. Get scored — and coached on exactly what you missed.** Voice-first, English-first, and multilingual by design.
 
@@ -49,23 +49,23 @@ DeepInterview closes the **prep ⇄ interview ⇄ feedback** loop: heavy reasoni
 This is what's tested in CI today. It builds the contracts, runs the test suites, and exercises the prep/live/post pipelines against **mock adapters** — no provider keys required.
 
 ```bash
-git clone https://github.com/ngoanpv/DeepInterview.git
-cd DeepInterview
+git clone https://github.com/neekuujii2/Hire_AI.git
+cd Hire_AI
 
 pnpm install          # install the JS/TS workspace
 pnpm build            # build packages/shared (contracts) + cli + web
 pnpm test             # TS + Pydantic parity + pipeline tests (offline, mock adapters)
 
-pnpm deepinterview init   # scaffold .env from .env.example (fill in keys later)
+pnpm Hire_Ai init   # scaffold .env from .env.example (fill in keys later)
 ```
 
-> `pnpm build` must run before `pnpm deepinterview init` — the CLI is built into `cli/dist/`.
+> `pnpm build` must run before `pnpm Hire_AI init` — the CLI is built into `cli/dist/`.
 > For the Python agent: `uv --directory apps/agent sync` then `uv --directory apps/agent run pytest`.
 
 ### 2. Full-stack path (`docker compose up` — verified)
 
 ```bash
-pnpm deepinterview init    # or: cp .env.example .env  (keys are optional — see note)
+pnpm Hire_AI init    # or: cp .env.example .env  (keys are optional — see note)
 docker compose up --build  # web (:3000) + agent API (:8000) + lightrag (:9621)
 ```
 
@@ -76,7 +76,7 @@ docker compose up --build  # web (:3000) + agent API (:8000) + lightrag (:9621)
 
 ### 3. One-click deploy
 
-[![Deploy web to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ngoanpv/DeepInterview)
+[![Deploy web to Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/neekuujii2/Hire_AI)
 
 The button deploys **`apps/web`** to Vercel. The Python **agent** is not serverless — run it via **Docker** (the `agent-api` image above) or on **[LiveKit Cloud Agents](https://docs.livekit.io/agents/)** for the live voice worker, and point the web app at it with `AGENT_API_URL`. See [`docs/DEPLOY.md`](docs/DEPLOY.md) (WP-12, in progress).
 
@@ -90,7 +90,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full dev setup and the provider-a
 
 </details>
 
-## Why DeepInterview
+## Why Hire_AI
 
 Practicing in your head (or in a text chat) isn't how interviews work. DeepInterview is **voice-first** — you answer out loud, in real time, like the real thing — and built to be **owned, not rented**:
 
@@ -103,7 +103,7 @@ Practicing in your head (or in a text chat) isn't how interviews work. DeepInter
 ## Features
 
 - **Personalized prep** — a LangGraph pipeline reads your CV + the JD, researches the target company, diffs the gap, and a **Question Planner** precomputes the plan, difficulty curve, rubrics, and seeded follow-ups — so the live loop stays fast. Uploaded **CV documents (PDF/DOCX) are parsed to text server-side with [Microsoft markitdown](https://github.com/microsoft/markitdown), with a Gemini multimodal fallback for scanned/image PDFs**.
-- **Community playbook library** — question-bank packs in [`skills/`](skills/) (versioned Markdown + YAML) are retrieved by role/level and injected into the Question Planner: packs the community writes get asked in real interviews. Validate yours with `pnpm deepinterview skills lint`.
+- **Community playbook library** — question-bank packs in [`skills/`](skills/) (versioned Markdown + YAML) are retrieved by role/level and injected into the Question Planner: packs the community writes get asked in real interviews. Validate yours with `pnpm Hire_AI skills lint`.
 - **Scored feedback** — a rubric-based evaluator + language coach write a per-competency `ScoreCard` with strengths, gaps, model answers, and next steps that map straight back to the questions you were asked.
 - **Prep Coach** *(in progress)* — turns your gaps into an LLM study loop (plan → drills → Socratic chat). Grounded + cited answers are **optional**: set `LIGHTRAG_URL` (or wire a managed RAG behind the same adapter) to ground responses in your own uploaded materials; by default the coach answers honestly without fabricated citations.
 - **Cost-smart avatars** *(in progress)* — the crossfade system + persona fallbacks are built; pre-rendered idle/speaking loops from **any video generator** drop in as packs land ([docs/AVATARS.md](docs/AVATARS.md) — until then it renders a calm gradient stage). Original personas only (no named IP), so runtime cost is **CDN-only — no per-minute avatar fees**.
@@ -121,7 +121,7 @@ Practicing in your head (or in a text chat) isn't how interviews work. DeepInter
 ### Run it 100% local
 
 ```bash
-pnpm deepinterview init      # choose "100% local models"
+pnpm Hire_AI init      # choose "100% local models"
 ```
 
 Sets `LLM_PROVIDER=ollama`, `STT_PROVIDER=whisper`, `TTS_PROVIDER=kokoro` — every
@@ -188,7 +188,7 @@ flowchart LR
 
 Full request-flow diagrams and the multi-agent design live in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-## Using DeepInterview
+## Using Hire_AI
 
 | Edition | What you get | Auth & billing | Status |
 |---|---|---|---|
@@ -200,9 +200,9 @@ Full request-flow diagrams and the multi-agent design live in [`docs/ARCHITECTUR
 ## Community
 
 - **[Discord](https://discord.gg/fT7Ecbyq)** — join the build-in-public chat.
-- **[GitHub Discussions](https://github.com/ngoanpv/DeepInterview/discussions)** — questions, ideas, language-pack and playbook requests.
-- **[Issues](https://github.com/ngoanpv/DeepInterview/issues)** — bugs & features (templates provided).
-- **[The playbook library](skills/README.md)** — browsable interview question-bank packs that directly shape the AI's questions; contributions welcome ([#38](https://github.com/ngoanpv/DeepInterview/issues/38)).
+- **[GitHub Discussions](https://github.com/neekuujii2/Hire_AI/discussions)** — questions, ideas, language-pack and playbook requests.
+- **[Issues](https://github.com/neekuujii2/Hire_AI/issues)** — bugs & features (templates provided).
+- **[The playbook library](skills/README.md)** — browsable interview question-bank packs that directly shape the AI's questions; contributions welcome ([#38](https://github.com/neekuujii2/Hire_AI/issues/)).
 
 Built in the open, with [Claude Code](https://claude.com/claude-code) as a heavily-used co-author — the AI interviewer declined to interview it. We respond to issues — ghosting contributors is the #1 cause of OSS death, and we don't intend to.
 
@@ -218,27 +218,19 @@ MLX on Apple Silicon and an OpenAI Realtime-compatible API. It's the closest
 sibling to this project's local mode and the best place to start if you're
 assembling your own.
 
-## Contributing
 
-We'd love your help — especially **interview question-bank packs** ([#38](https://github.com/ngoanpv/DeepInterview/issues/38)), **language packs**, **provider adapters**, and **accessibility**. Start with:
-
-- [CONTRIBUTING.md](CONTRIBUTING.md) — dev setup, the monorepo map, the work-package model, the provider-adapter (mock-first) pattern, and how to run **offline with no keys**.
-- [Good first issues](docs/GOOD_FIRST_ISSUES.md) — concrete, scoped tasks drawn from real gaps.
-- [Code of Conduct](CODE_OF_CONDUCT.md) · [Security policy](SECURITY.md).
-
-[![Contributors](https://contrib.rocks/image?repo=ngoanpv/DeepInterview)](https://github.com/ngoanpv/DeepInterview/graphs/contributors)
 
 ## Citation
 
 If DeepInterview helps your work, please cite it. Full metadata is in [`CITATION.cff`](CITATION.cff).
 
 ```bibtex
-@software{deepinterview2026,
-  title  = {DeepInterview: Voice-First, Multilingual AI Mock Interviewer},
-  author = {The DeepInterview contributors},
+@software{Hire_AI2026,
+  title  = {Hire_AI: Voice-First, Multilingual AI Mock Interviewer},
+  author = {The Hire_AI contributors},
   year   = {2026},
   license = {Apache-2.0},
-  url    = {https://github.com/ngoanpv/DeepInterview}
+  url    = {https://github.com/neekuujii2/Hire_AI}
 }
 ```
 
@@ -248,6 +240,6 @@ If DeepInterview helps your work, please cite it. Full metadata is in [`CITATION
 
 **License:** [Apache-2.0](LICENSE) · Built in the open
 
-[back to top](#deepinterview-voice-first-multilingual-ai-mock-interviewer)
+[back to top](#Hire_AI-voice-first-multilingual-ai-mock-interviewer)
 
 </div>
