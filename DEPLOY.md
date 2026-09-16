@@ -22,7 +22,7 @@ Copy `.env.example` and fill in:
 
 ```bash
 # Database
-DATABASE_URL=postgresql://postgres:2201730068@Neerajkumar@db.wdvmdruqclyhrilknaaq.supabase.co:5432/postgres
+DATABASE_URL=
 SUPABASE_URL=https://xxx.supabase.co
 SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
@@ -30,8 +30,8 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...
 # Auth
 
 CLERK_WEBHOOK_SECRET=whsec_...
-CLERK_PUBLISHABLE_KEY=pk_test_cXVpY2stcmF2ZW4tODA5Mi5jbGVyay5hY2NvdW50cy5kZXYk
-CLERK_SECRET_KEY=sk_test_284stE1XUyaRrH30OlVTYcaCynI2BdCeVCketORH5b
+CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
 # AI
 GEMINI_API_KEY=sk-...
 DEEPGRAM_API_KEY=...
@@ -93,7 +93,7 @@ Key tables created by `0007_hireai_schema.sql`:
    ```
 3. **Start Command:**
    ```bash
-   cd apps/agent && uvicorn deepinterview_agent.api:create_app --factory --host 0.0.0.0 --port 8000
+   cd apps/agent && uvicorn deepinterview_agent.app:app --host 0.0.0.0 --port 8000
    ```
 4. Set environment variables
 
