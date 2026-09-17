@@ -84,8 +84,9 @@ export async function GET() {
     const competencies = s.scorecards?.[0]?.competency_scores ?? [];
     for (const c of competencies) {
       if (!skillMap[c.competency]) skillMap[c.competency] = { total: 0, count: 0 };
-      skillMap[c.competency].total += c.score;
-      skillMap[c.competency].count += 1;
+      const entry = skillMap[c.competency]!;
+      entry.total += c.score;
+      entry.count += 1;
     }
   }
   const topSkills = Object.entries(skillMap)
