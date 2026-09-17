@@ -58,14 +58,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { data, error } = await supabase
-      .from("jobs")
+    const { data, error } = await (supabase.from("jobs") as any)
       .insert({
         title: body.title.trim(),
         seniority: body.seniority ?? "mid",
         jd: body.jd ?? null,
         status: body.status ?? "draft",
-      } as any)
+      })
       .select("id, title, status")
       .single();
 

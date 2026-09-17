@@ -157,9 +157,8 @@ async function handleOrganizationUpdated(
 
   if (Object.keys(updates).length === 0) return;
 
-  await supabase
-    .from("organizations")
-    .update(updates as any)
+  await (supabase.from("organizations") as any)
+    .update(updates)
     .eq("clerk_org_id", clerkOrgId);
 }
 
@@ -214,9 +213,8 @@ async function handleMembershipDeleted(
   // Soft-delete: set role to 'member' and leave the row (audit trail).
   // A hard delete would cascade to unrelated data; the RLS policy already
   // prevents access if the user's org doesn't match the JWT.
-  await supabase
-    .from("users")
-    .update({ role: "member" } as any)
+  await (supabase.from("users") as any)
+    .update({ role: "member" })
     .eq("clerk_user_id", clerkUserId);
 }
 

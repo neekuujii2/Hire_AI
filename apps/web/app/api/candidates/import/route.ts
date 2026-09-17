@@ -70,8 +70,7 @@ export async function POST(request: Request) {
   // Insert new candidates.
   let inserted = 0;
   if (newCandidates.length > 0) {
-    const { data, error } = await supabase
-      .from("candidates")
+    const { data, error } = await (supabase.from("candidates") as any)
       .insert(
         newCandidates.map((c) => ({
           job_id: body.job_id,

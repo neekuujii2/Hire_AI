@@ -64,12 +64,12 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "Feedback already submitted." }, { status: 409 });
   }
 
-  const { error } = await supabase.from("candidate_nps").insert({
+  const { error } = await (supabase.from("candidate_nps") as any).insert({
     candidate_id: id,
     rating: body.rating,
     nps_score: body.nps_score ?? null,
     feedback_text: body.feedback_text ?? null,
-  } as any);
+  });
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

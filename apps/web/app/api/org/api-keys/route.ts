@@ -68,14 +68,14 @@ export async function POST(request: Request) {
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-  const { error } = await supabase.from("api_keys").insert({
+  const { error } = await (supabase.from("api_keys") as any).insert({
     org_id: orgId,
     name: body.name.trim(),
     key_prefix: keyPrefix,
     key_hash: keyHash,
     created_by: userId,
     active: true,
-  } as any);
+  });
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
@@ -102,9 +102,8 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: false, error: "Key id is required." }, { status: 400 });
   }
 
-  const { error } = await supabase
-    .from("api_keys")
-    .update({ active: false } as any)
+  const { error } = await (supabase.from("api_keys") as any)
+    .update({ active: false })
     .eq("id", keyId)
     .eq("org_id", orgId);
 

@@ -45,9 +45,8 @@ export async function POST() {
       if (now.getTime() - createdAt.getTime() < retention * 86400000) continue;
 
       // Soft-delete candidate.
-      await supabase
-        .from("candidates")
-        .update({ deleted_at: now.toISOString() } as any)
+      await (supabase.from("candidates") as any)
+        .update({ deleted_at: now.toISOString() })
         .eq("id", cand.id);
       candidatesDeleted++;
 

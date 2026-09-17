@@ -47,9 +47,8 @@ export async function PATCH(
   }
 
   try {
-    const { error } = await supabase
-      .from("candidates")
-      .update({ pipeline_status: body.status } as any)
+    const { error } = await (supabase.from("candidates") as any)
+      .update({ pipeline_status: body.status })
       .eq("id", id);
 
     if (error) {
