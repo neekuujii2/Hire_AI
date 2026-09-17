@@ -32,7 +32,7 @@ export async function GET() {
     .is("deleted_at", null);
 
   const allSessions = sessions ?? [];
-  const completed = allSessions.filter((s: any) => s.status === "complete");
+  const completed: any[] = allSessions.filter((s: any) => s.status === "complete");
   const totalInterviews = allSessions.length;
   const completedCount = completed.length;
 
