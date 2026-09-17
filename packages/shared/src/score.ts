@@ -72,7 +72,15 @@ export const ComparativeBenchmarkSchema = z.object({
 export type ComparativeBenchmark = z.infer<typeof ComparativeBenchmarkSchema>;
 
 export const InterviewInsightsSchema = z.object({
-  communication_style: CommunicationStyleSchema.default({}),
+  communication_style: CommunicationStyleSchema.default({
+    speaking_pace_wpm: 0,
+    filler_word_count: 0,
+    filler_words: [],
+    sentence_complexity_ratio: 0,
+    confidence_score: 0,
+    hedge_word_count: 0,
+    summary: "",
+  } as z.infer<typeof CommunicationStyleSchema>),
   star_analysis: z.array(STARAnalysisSchema).default([]),
   star_overall_pct: z.number().default(0),
   cultural_fit: z.array(CulturalFitSignalSchema).default([]),
@@ -117,8 +125,40 @@ export const ScoreCardSchema = z.object({
   language_report: LanguageReportSchema,
   summary: z.string(),
   coverage_pct: z.number().default(1.0),
-  insights: InterviewInsightsSchema.default({}),
-  match_score: MatchScoreBreakdownSchema.default({}),
-  candidate_feedback: CandidateFeedbackSchema.default({}),
+  insights: InterviewInsightsSchema.default({
+    communication_style: {
+      speaking_pace_wpm: 0,
+      filler_word_count: 0,
+      filler_words: [],
+      sentence_complexity_ratio: 0,
+      confidence_score: 0,
+      hedge_word_count: 0,
+      summary: "",
+    },
+    star_analysis: [],
+    star_overall_pct: 0,
+    cultural_fit: [],
+    cultural_fit_score: 0,
+    red_flags: [],
+    benchmarks: [],
+    summary: "",
+  } as z.infer<typeof InterviewInsightsSchema>),
+  match_score: MatchScoreBreakdownSchema.default({
+    technical_fit: 0,
+    communication: 0,
+    behavioral_depth: 0,
+    proctoring_confidence: 100,
+    cultural_fit: 0,
+    final_score: 0,
+    recommendation: "maybe",
+    summary: "",
+  } as z.infer<typeof MatchScoreBreakdownSchema>),
+  candidate_feedback: CandidateFeedbackSchema.default({
+    strengths: [],
+    improvement_areas: [],
+    overall_assessment: "",
+    encouragement: "",
+    full_text: "",
+  } as z.infer<typeof CandidateFeedbackSchema>),
 });
 export type ScoreCard = z.infer<typeof ScoreCardSchema>;
