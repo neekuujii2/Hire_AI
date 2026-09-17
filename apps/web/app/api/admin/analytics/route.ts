@@ -74,7 +74,7 @@ export async function GET() {
   const ranges = ["0-1", "1-2", "2-3", "3-4", "4-5"];
   const scoreDistribution = ranges.map((range) => {
     const [lo, hi] = range.split("-").map(Number);
-    const count = scores.filter((s: number) => s >= lo && s < hi).length;
+    const count = scores.filter((s: number) => s >= lo! && s < hi!).length;
     return { range, count };
   });
 
