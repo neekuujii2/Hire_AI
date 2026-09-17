@@ -7,11 +7,13 @@ import { presignUpload } from "@/lib/r2";
 
 const ConsentSchema = z.object({
   consent: z.literal(true),
-  cv?: {
+  cv: z
+    .object({
     filename: z.string().min(1),
     content_type: z.string().min(1),
     size: z.number().int().positive().max(5 * 1024 * 1024),
-  },
+    })
+    .optional(),
 });
 
 const ALLOWED_CV_TYPES = new Set([

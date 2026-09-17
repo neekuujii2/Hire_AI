@@ -9,4 +9,5 @@ packages:
 allowBuilds:
   "@clerk/shared": true
   esbuild: true
+  msgpackr-extract: true
   sharp: true
