@@ -93,7 +93,7 @@ export async function POST(
     };
     if (orgId) eventData.org_id = orgId;
 
-    await supabase.from("proctoring_events").insert(eventData);
+    await supabase.from("proctoring_events").insert(eventData as any);
 
     // Update session warning count.
     if (shouldTerminate) {
@@ -103,12 +103,12 @@ export async function POST(
           warning_count: newCount,
           status: "terminated_proctor",
           termination_reason: body.reason,
-        })
+        } as any)
         .eq("id", sessionId);
     } else {
       await supabase
         .from("sessions")
-        .update({ warning_count: newCount })
+        .update({ warning_count: newCount } as any)
         .eq("id", sessionId);
     }
 

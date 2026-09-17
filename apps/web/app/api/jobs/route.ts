@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         seniority: body.seniority ?? "mid",
         jd: body.jd ?? null,
         status: body.status ?? "draft",
-      })
+      } as any)
       .select("id, title, status")
       .single();
 

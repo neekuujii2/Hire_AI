@@ -69,7 +69,7 @@ export async function POST(
     rating: body.rating,
     nps_score: body.nps_score ?? null,
     feedback_text: body.feedback_text ?? null,
-  });
+  } as any);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

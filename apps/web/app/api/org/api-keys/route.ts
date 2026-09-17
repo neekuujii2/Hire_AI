@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     key_hash: keyHash,
     created_by: userId,
     active: true,
-  });
+  } as any);
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
@@ -104,7 +104,7 @@ export async function DELETE(request: Request) {
 
   const { error } = await supabase
     .from("api_keys")
-    .update({ active: false })
+    .update({ active: false } as any)
     .eq("id", keyId)
     .eq("org_id", orgId);
 

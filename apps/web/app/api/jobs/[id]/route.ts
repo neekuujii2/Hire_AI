@@ -63,7 +63,7 @@ export async function PATCH(
   try {
     const { error } = await supabase
       .from("jobs")
-      .update(updates)
+      .update(updates as any)
       .eq("id", id);
 
     if (error) {
