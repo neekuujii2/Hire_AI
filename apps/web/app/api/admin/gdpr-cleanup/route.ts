@@ -47,7 +47,7 @@ export async function POST() {
       // Soft-delete candidate.
       await supabase
         .from("candidates")
-        .update({ deleted_at: now.toISOString() })
+        .update({ deleted_at: now.toISOString() } as any)
         .eq("id", cand.id);
       candidatesDeleted++;
 
@@ -61,7 +61,7 @@ export async function POST() {
       for (const s of (sessions ?? []) as any[]) {
         await supabase
           .from("sessions")
-          .update({ deleted_at: now.toISOString() })
+          .update({ deleted_at: now.toISOString() } as any)
           .eq("id", s.id);
         sessionsDeleted++;
       }
@@ -76,7 +76,7 @@ export async function POST() {
       for (const t of (transcripts ?? []) as any[]) {
         await supabase
           .from("transcripts")
-          .update({ deleted_at: now.toISOString() })
+          .update({ deleted_at: now.toISOString() } as any)
           .eq("id", t.id);
         transcriptsDeleted++;
       }
