@@ -58,9 +58,8 @@ export async function POST() {
         .is("deleted_at", null);
 
       for (const s of (sessions ?? []) as any[]) {
-        await supabase
-          .from("sessions")
-          .update({ deleted_at: now.toISOString() } as any)
+        await (supabase.from("sessions") as any)
+          .update({ deleted_at: now.toISOString() })
           .eq("id", s.id);
         sessionsDeleted++;
       }
@@ -73,9 +72,8 @@ export async function POST() {
         .is("deleted_at", null);
 
       for (const t of (transcripts ?? []) as any[]) {
-        await supabase
-          .from("transcripts")
-          .update({ deleted_at: now.toISOString() } as any)
+        await (supabase.from("transcripts") as any)
+          .update({ deleted_at: now.toISOString() })
           .eq("id", t.id);
         transcriptsDeleted++;
       }
