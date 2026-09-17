@@ -80,7 +80,7 @@ export async function POST(request: Request) {
           pipeline_status: "invited",
         })),
       )
-      .select("id");
+      .select("id") as { data: any; error: any };
 
     if (!error && data) {
       inserted = data.length;
