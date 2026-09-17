@@ -23,7 +23,7 @@ export async function POST() {
       .select("org_id, recording_retention_days");
 
     const orgRetention: Record<string, number> = {};
-    for (const cfg of orgConfigs ?? []) {
+    for (const cfg of (orgConfigs ?? []) as any[]) {
       orgRetention[cfg.org_id] = cfg.recording_retention_days ?? defaultRetentionDays;
     }
 
@@ -39,7 +39,7 @@ export async function POST() {
       .is("deleted_at", null)
       .lt("created_at", cutoff);
 
-    for (const cand of oldCandidates ?? []) {
+    for (const cand of (oldCandidates ?? []) as any[]) {
       const retention = orgRetention[cand.org_id] ?? defaultRetentionDays;
       const createdAt = new Date(cand.created_at);
       if (now.getTime() - createdAt.getTime() < retention * 86400000) continue;
@@ -58,7 +58,7 @@ export async function POST() {
         .eq("candidate_id", cand.id)
         .is("deleted_at", null);
 
-      for (const s of sessions ?? []) {
+      for (const s of (sessions ?? []) as any[]) {
         await supabase
           .from("sessions")
           .update({ deleted_at: now.toISOString() })
@@ -73,7 +73,7 @@ export async function POST() {
         .eq("candidate_id", cand.id)
         .is("deleted_at", null);
 
-      for (const t of transcripts ?? []) {
+      for (const t of (transcripts ?? []) as any[]) {
         await supabase
           .from("transcripts")
           .update({ deleted_at: now.toISOString() })
