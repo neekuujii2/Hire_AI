@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       continue;
     }
     seen.add(email);
-    valid.push({ name: c.name?.trim() || email.split("@")[0], email });
+    valid.push({ name: (c.name?.trim() || email.split("@")[0]) as string, email });
   }
 
   // Check for existing candidates in this job.
