@@ -76,7 +76,8 @@ export async function POST(
         { status: 503 },
       );
     } else {
-      const normalized = (body.cv.content_type ?? "")
+      const cv = body.cv!;
+      const normalized = cv.content_type
         .split(";", 1)[0]
         .trim()
         .toLowerCase();
@@ -86,9 +87,9 @@ export async function POST(
           { status: 415 },
         );
       }
-      const safeName = body.cv.filename.replace(/[/\\]/g, "_").slice(0, 100);
+      const safeName = cv.filename.replace(/[/\\]/g, "_").slice(0, 100);
       const key = `cvs/${payload.candidate.id}/${randomUUID()}-${safeName}`;
-      const signed = await presignUpload(key, normalized, body.cv.size);
+      const signed = await presignUpload(key, normalized, cv.size);
       cvPublicUrl = signed.publicUrl;
     }
   }
