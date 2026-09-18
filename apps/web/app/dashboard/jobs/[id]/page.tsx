@@ -71,8 +71,8 @@ async function loadCandidates(jobId: string): Promise<Candidate[]> {
   if (!supabase) return [];
 
   try {
-    const { data: candidates } = await supabase
-      .from("candidates")
+    const { data: candidates } = await (supabase
+      .from("candidates") as any)
       .select("id, name, email, pipeline_status, created_at, session_id")
       .eq("job_id", jobId)
       .order("created_at", { ascending: false });
@@ -83,8 +83,8 @@ async function loadCandidates(jobId: string): Promise<Candidate[]> {
       candidates.map(async (c: { id: string; name: string; email: string; pipeline_status: string; created_at: string; session_id: string | null }) => {
         let overall_score: number | null = null;
         if (c.session_id) {
-          const { data: sc } = await supabase
-            .from("scorecards")
+          const { data: sc } = await (supabase
+            .from("scorecards") as any)
             .select("overall_score")
             .eq("session_id", c.session_id)
             .maybeSingle();

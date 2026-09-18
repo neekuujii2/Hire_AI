@@ -15,18 +15,22 @@ export function useCsvImport(jobId: string) {
     if (lines.length === 0) return;
 
     // Detect header row.
-    const header = lines[0].toLowerCase();
-    const hasHeader = header.includes("email") || header.includes("name");
+    const firstLine = lines[0];
+    const hasHeader = firstLine !== undefined && (firstLine.toLowerCase().includes("email") || firstLine.toLowerCase().includes("name"));
 
     const start = hasHeader ? 1 : 0;
     const candidates: Array<{ name: string; email: string }> = [];
 
     for (let i = start; i < lines.length; i++) {
-      const parts = lines[i].split(",").map((s) => s.trim().replace(/^["']|["']$/g, ""));
-      if (parts.length >= 2) {
-        candidates.push({ name: parts[0], email: parts[1].toLowerCase() });
-      } else if (parts.length === 1 && parts[0].includes("@")) {
-        candidates.push({ name: parts[0].split("@")[0], email: parts[0].toLowerCase() });
+      const line = lines[i];
+      if (!line) continue;
+      const parts = line.split(",").map((s) => s.trim().replace(/^["']|["']$/g, ""));
+      const firstName = parts[0];
+      const secondEmail = parts[1];
+      if (parts.length >= 2 && firstName !== undefined && secondEmail !== undefined) {
+        candidates.push({ name: firstName, email: secondEmail.toLowerCase() });
+      } else if (parts.length === 1 && firstName !== undefined && firstName.includes("@")) {
+        candidates.push({ name: firstName.split("@")[0] ?? "", email: firstName.toLowerCase() });
       }
     }
 

@@ -164,12 +164,13 @@ async function handleMembershipCreated(
   supabase: ReturnType<typeof createServiceClient> & object,
   data: Record<string, unknown>,
 ) {
-  const clerkUserId = data.user?.id as string;
-  const clerkOrgId = data.organization?.id as string;
-  const email = (data.user?.email_addresses as Array<{ email_address: string }>)?.[0]
+  const d = data as Record<string, any>;
+  const clerkUserId = d.user?.id as string;
+  const clerkOrgId = d.organization?.id as string;
+  const email = (d.user?.email_addresses as Array<{ email_address: string }>)?.[0]
     ?.email_address as string;
-  const name = (data.user?.first_name as string)
-    ? `${data.user.first_name}${data.user.last_name ? ` ${data.user.last_name}` : ""}`
+  const name = (d.user?.first_name as string)
+    ? `${d.user.first_name}${d.user.last_name ? ` ${d.user.last_name}` : ""}`
     : null;
   const role = mapRole(data.role as string);
 
@@ -204,7 +205,8 @@ async function handleMembershipDeleted(
   supabase: ReturnType<typeof createServiceClient> & object,
   data: Record<string, unknown>,
 ) {
-  const clerkUserId = data.user?.id as string;
+  const d = data as Record<string, any>;
+  const clerkUserId = d.user?.id as string;
   if (!clerkUserId) return;
 
   // Soft-delete: set role to 'member' and leave the row (audit trail).

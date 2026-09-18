@@ -218,7 +218,7 @@ export function QuestionBankEditor({
             </div>
           ))}
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={addCompetency}>
+            <Button variant="out" size="sm" onClick={addCompetency}>
               <Plus className="h-3 w-3 mr-1" />
               Add Competency
             </Button>
@@ -240,7 +240,7 @@ export function QuestionBankEditor({
           </div>
           <div className="flex gap-2">
             <Button
-              variant="outline"
+              variant="out"
               size="sm"
               onClick={handleGenerate}
               disabled={generating}

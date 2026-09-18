@@ -17,7 +17,7 @@ export function MobileGate({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
-    const isTouch = "ontouchstart" in window || navigator.maxPoints > 0;
+    const isTouch = "ontouchstart" in window || (navigator as any).maxPoints > 0;
     const isSmall = window.innerWidth < 768;
     const isMobileUA =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(

@@ -3,7 +3,7 @@ import { serverEnv, isLiveKitConfigured } from "@/lib/env";
 import { SessionViewSchema, type ClientSessionView } from "@/lib/session";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient as createAnonClient } from "@/lib/supabase/server";
-import { createInviteSessionId } from "@/lib/invite-session";
+import { getInviteSessionId } from "@/lib/invite-session";
 import { createInterviewToken } from "@/lib/livekit";
 
 export const dynamic = "force-dynamic";

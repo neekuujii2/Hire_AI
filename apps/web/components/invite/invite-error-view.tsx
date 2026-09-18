@@ -38,6 +38,9 @@ const COPY: Record<
   },
 };
 
+type CopyEntry = { eyebrow: string; title: string; body: string; icon: typeof AlertTriangle };
+const DEFAULT_COPY = COPY["invalid"] as CopyEntry;
+
 export function InviteErrorView({
   error,
   token,
@@ -47,7 +50,7 @@ export function InviteErrorView({
   token: string;
   supabaseConfigured: boolean;
 }) {
-  const copy = COPY[error] ?? COPY.invalid;
+  const copy = ((COPY as Record<string, CopyEntry>)[error] ?? DEFAULT_COPY) as CopyEntry;
   const Icon = copy.icon;
 
   return (

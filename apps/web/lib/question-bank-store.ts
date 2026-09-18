@@ -44,7 +44,7 @@ export async function loadBank(
     .eq("is_active", true)
     .order("updated_at", { ascending: false })
     .limit(1)
-    .maybeSingle<BankRow>();
+    .maybeSingle();
 
   if (!bank) {
     return {
@@ -84,7 +84,7 @@ export async function saveBank(
     .eq("is_active", true)
     .order("updated_at", { ascending: false })
     .limit(1)
-    .maybeSingle<{ id: string }>();
+    .maybeSingle();
 
   if (existing) {
     const { error } = await (supabase.from("question_banks") as any)

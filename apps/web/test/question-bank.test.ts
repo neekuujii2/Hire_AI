@@ -67,7 +67,7 @@ describe("normalizeWeights", () => {
     ]);
     const total = out.reduce((s, c) => s + c.weight, 0);
     expect(total).toBeCloseTo(1, 6);
-    expect(out[0].weight).toBeCloseTo(2 / 3, 3);
+    expect(out[0]?.weight).toBeCloseTo(2 / 3, 3);
   });
 
   it("splits evenly when total is zero", () => {

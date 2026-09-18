@@ -61,7 +61,7 @@ export function CandidateImport({ jobId, onImportComplete }: CandidateImportProp
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={parse} disabled={!csvText.trim()}>
+          <Button variant="out" onClick={parse} disabled={!csvText.trim()}>
             <FileSpreadsheet className="h-4 w-4 mr-2" />
             Parse
           </Button>
@@ -115,7 +115,7 @@ export function CandidateImport({ jobId, onImportComplete }: CandidateImportProp
             {result.errors.length > 0 && (
               <div className="mt-2 space-y-1">
                 {result.errors.map((e, i) => (
-                  <Badge key={i} variant="destructive" className="text-xs">
+                  <Badge key={i} variant="outline" className="text-xs">
                     {e.email}: {e.error}
                   </Badge>
                 ))}

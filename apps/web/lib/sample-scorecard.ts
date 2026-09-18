@@ -95,6 +95,48 @@ export const SAMPLE_SCORECARD: ScoreCard = {
     summary:
       "Fluent, well-paced English with controlled code-switching. Trimming filler words ('like', 'you know') would sharpen otherwise crisp delivery.",
   },
+  insights: {
+    communication_style: {
+      speaking_pace_wpm: 145,
+      filler_word_count: 14,
+      filler_words: ["like", "you know"],
+      sentence_complexity_ratio: 0.72,
+      confidence_score: 4.0,
+      hedge_word_count: 3,
+      summary: "Confident and well-paced delivery with occasional filler words.",
+    },
+    star_analysis: [],
+    star_overall_pct: 0.4,
+    cultural_fit: [],
+    cultural_fit_score: 3.5,
+    red_flags: [],
+    benchmarks: [],
+    summary: "Solid technical candidate with room to improve behavioral storytelling.",
+  },
+  match_score: {
+    technical_fit: 4.2,
+    communication: 4.0,
+    behavioral_depth: 2.1,
+    proctoring_confidence: 95,
+    cultural_fit: 3.5,
+    final_score: 3.6,
+    recommendation: "maybe",
+    summary: "Strong technically; behavioral depth needs improvement.",
+  },
+  candidate_feedback: {
+    strengths: [
+      "Deep distributed-systems knowledge",
+      "Clear and confident communication",
+      "Quantifies impact with metrics",
+    ],
+    improvement_areas: [
+      "Use STAR structure consistently for behavioral questions",
+      "Show leadership impact beyond immediate team",
+    ],
+    overall_assessment: "A strong technical candidate with clear growth areas in behavioral responses.",
+    encouragement: "Your technical depth is interview-ready. Focus on structuring your stories with STAR to maximize your impact.",
+    full_text: "Thank you for the interview. Your technical skills are impressive, particularly in distributed systems. To strengthen your candidacy, we recommend practicing the STAR method for behavioral questions and preparing examples of cross-team leadership.",
+  },
   summary:
     "A strong technical interview let down by storytelling structure. The candidate's systems depth and communication are interview-ready; the clear growth areas are STAR discipline on behavioral questions and demonstrating leadership impact beyond the immediate team.",
 };

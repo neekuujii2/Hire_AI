@@ -75,7 +75,7 @@ export function ConsentForm({ token, payload }: ConsentFormProps) {
         throw new Error(data.error || "Could not prepare CV upload.");
       }
 
-      const { cv_url } = (await presignRes.json()) as {
+      const { cv_url, cv_upload } = (await presignRes.json()) as {
         cv_url: string | null;
         cv_upload?: string;
       };

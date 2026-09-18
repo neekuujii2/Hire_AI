@@ -42,5 +42,11 @@ export async function setInviteSessionId(
 /** Clears the invite-session cookie (e.g. on error or after completion). */
 export async function clearInviteSessionId(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE, { path: "/invite" });
+  cookieStore.set(SESSION_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 0,
+    path: "/invite",
+    sameSite: "lax",
+  });
 }

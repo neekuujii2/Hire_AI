@@ -93,11 +93,7 @@ export function PrepLoader({
       return;
     }
 
-    if (
-      view.status === "complete" ||
-      view.status === "no_answers" ||
-      view.status === "complete"
-    ) {
+    if (view.status === "complete" || view.status === "no_answers") {
       router.push(`/invite/${getTokenFromPath()}/complete`);
       return;
     }

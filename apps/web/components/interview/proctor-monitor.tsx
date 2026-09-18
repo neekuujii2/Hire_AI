@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRoom } from "@livekit/components-react";
-import type { DataPacket } from "livekit-client";
+import { useMaybeRoomContext } from "@livekit/components-react";
 
 interface ProctorMonitorProps {
   sessionId: string;
@@ -37,7 +36,7 @@ export function ProctorMonitor({
   onTerminate,
   onWarning,
 }: ProctorMonitorProps) {
-  const room = useRoom();
+  const room = useMaybeRoomContext();
   const warnedCountRef = useRef(0);
   const terminatedRef = useRef(false);
 
@@ -93,7 +92,9 @@ export function ProctorMonitor({
 
     // Override getDisplayMedia to block screen sharing.
     const originalGetDisplayMedia =
-      navigator.mediaDevices?.getDisplayMedia?.bind(navigator.mediaDevices);
+      navigator.mediaDevices?.getDisplayMedia?.bind(navigator.mediaDevices) as
+        | Function
+        | undefined;
     if (originalGetDisplayMedia) {
       Object.defineProperty(navigator.mediaDevices, "getDisplayMedia", {
         value: () => {
@@ -123,9 +124,9 @@ export function ProctorMonitor({
   useEffect(() => {
     if (!room) return;
 
-    const handler = (payload: DataPacket) => {
+    const handler = (payload: Uint8Array) => {
       // LiveKit data messages carry the payload as a Uint8Array.
-      const raw = new TextDecoder().decode(payload.payload);
+      const raw = new TextDecoder().decode(payload);
       let msg: Record<string, unknown>;
       try {
         msg = JSON.parse(raw);

@@ -62,8 +62,8 @@ export async function POST(
 
   try {
     // Read current session state.
-    const { data: session, error: sessErr } = await supabase
-      .from("sessions")
+    const { data: session, error: sessErr } = await (supabase
+      .from("sessions") as any)
       .select("org_id, warning_count, max_warning_limit, candidate_id")
       .eq("id", sessionId)
       .maybeSingle();

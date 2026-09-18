@@ -308,7 +308,7 @@ function CandidatesTab({
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {columns.map((col) => {
             const items = candidates.filter((c) =>
-              col.filter.includes(c.pipeline_status as any),
+              (col.filter as readonly string[]).includes(c.pipeline_status),
             );
             return (
               <div key={col.key}>

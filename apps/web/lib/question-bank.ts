@@ -87,11 +87,13 @@ export function normalizeWeights(
   }));
   const drift =
     1 - rounded.reduce((sum, c) => sum + c.weight, 0);
-  rounded[rounded.length - 1] = {
-    ...rounded[rounded.length - 1],
-    weight:
-      Math.round((rounded[rounded.length - 1].weight + drift) * 1000) / 1000,
-  };
+  const last = rounded[rounded.length - 1];
+  if (last) {
+    rounded[rounded.length - 1] = {
+      ...last,
+      weight: Math.round((last.weight + drift) * 1000) / 1000,
+    };
+  }
   return rounded;
 }
 
@@ -102,7 +104,8 @@ export function moveItem<T>(items: T[], from: number, to: number): T[] {
   }
   if (from === to) return items;
   const next = [...items];
-  const [moved] = next.splice(from, 1);
+  const moved = next.splice(from, 1)[0];
+  if (moved === undefined) return items;
   next.splice(to, 0, moved);
   return next;
 }

@@ -5,14 +5,12 @@ import {
   BarChart3,
   CheckCircle2,
   Plus,
-  ArrowUpRight,
   Clock,
   UserCheck,
   UserX,
 } from "lucide-react";
 import { createServiceClient } from "@/lib/supabase/service";
 import { Eyebrow } from "@/components/ui/eyebrow";
-import { Badge } from "@/components/ui/badge";
 import { buttonClasses } from "@/components/ui/button";
 import {
   Card,

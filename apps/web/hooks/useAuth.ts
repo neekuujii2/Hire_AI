@@ -49,7 +49,7 @@ export function useAuth(): AuthContext {
     userId: userId ?? null,
     orgId: organization?.id ?? null,
     orgSlug: organization?.slug ?? null,
-    userRole: organization?.membership?.role ?? null,
+    userRole: (organization as any)?.membership?.role ?? null,
     isLoaded,
     isSignedIn: Boolean(isSignedIn),
     hasOrg: Boolean(organization),

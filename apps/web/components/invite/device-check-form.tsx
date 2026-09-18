@@ -262,7 +262,7 @@ export function DeviceCheckForm({
           </Badge>
         </div>
 
-        {results.microphone === "check" || results.microphone === "pass" ? (
+        {(results.microphone as string) === "check" || results.microphone === "pass" ? (
           <div className="mt-4 flex h-6 items-end gap-1" aria-hidden>
             {Array.from({ length: 16 }).map((_, i) => {
               const lit = Math.round(micLevel * 16);

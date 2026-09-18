@@ -62,8 +62,8 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
 
-    const { data: org, error: orgErr } = await supabase
-      .from("organizations")
+    const { data: org, error: orgErr } = await (supabase
+      .from("organizations") as any)
       .upsert(
         {
           clerk_org_id: clerkOrgId,
@@ -83,12 +83,13 @@ export async function POST(request: Request) {
     }
 
     // Ensure default config exists.
-    await supabase
-      .from("org_configs")
-      .upsert({ org_id: org.id }, { onConflict: "org_id" });
+    await (supabase.from("org_configs") as any).upsert(
+      { org_id: org.id },
+      { onConflict: "org_id" },
+    );
 
     // Ensure user row exists with admin role.
-    await supabase.from("users").upsert(
+    await (supabase.from("users") as any).upsert(
       {
         clerk_user_id: userId,
         org_id: org.id,

@@ -138,7 +138,7 @@ export function ApiKeyManager() {
               className="flex items-center justify-between rounded-lg border border-line px-3 py-2.5"
             >
               <div className="flex items-center gap-3">
-                <Badge variant={k.active ? "default" : "destructive"} className="text-[10px]">
+                <Badge variant={k.active ? "default" : "outline"} className="text-[10px]">
                   {k.active ? "Active" : "Revoked"}
                 </Badge>
                 <div>

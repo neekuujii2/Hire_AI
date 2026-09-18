@@ -23,8 +23,8 @@ export async function getCurrentOrgId(): Promise<string | null> {
   if (!supabase) return null;
 
 try {
-    const { data } = await supabase
-      .from("organizations")
+    const { data } = await (supabase
+      .from("organizations") as any)
       .select("id")
       .eq("clerk_org_id", clerkOrgId)
       .maybeSingle();
@@ -75,9 +75,7 @@ export function scopedQuery<T extends string>(
     throw new Error("Database not configured.");
   }
 
-  return supabase.from(table).eq("org_id", orgId) as ReturnType<
-    typeof supabase.from<T>
-  >;
+  return (supabase.from(table) as any).eq("org_id", orgId) as any;
 }
 
 /**
@@ -92,8 +90,8 @@ export function scopedOrgQuery(
     throw new Error("Database not configured.");
   }
 
-  return supabase
-    .from("organizations")
+  return (supabase
+    .from("organizations") as any)
     .eq("clerk_org_id", clerkOrgId);
 }
 

@@ -36,10 +36,16 @@ interface Scorecard {
     competency: string;
     score: number;
     evidence: string;
-    level: string;
+    level: "strong" | "solid" | "developing" | "weak";
   }>;
   strengths: string[];
   weaknesses: string[];
+  weak_competencies: string[];
+  model_answers: string[];
+  next_steps: string[];
+  coverage_pct: number;
+  insights: Record<string, unknown>;
+  match_score: Record<string, unknown>;
   summary: string;
   language_report: {
     fluency_score: number;
@@ -47,6 +53,7 @@ interface Scorecard {
     clarity_score: number;
     summary: string;
   };
+  candidate_feedback: Record<string, unknown>;
 }
 
 interface Transcript {
@@ -72,8 +79,8 @@ async function loadCandidate(
   if (!supabase) return null;
 
   try {
-    const { data: candidate, error } = await supabase
-      .from("candidates")
+    const { data: candidate, error } = await (supabase
+      .from("candidates") as any)
       .select("id, name, email, pipeline_status, created_at, job_id, session_id")
       .eq("id", candidateId)
       .eq("job_id", jobId)
@@ -81,8 +88,8 @@ async function loadCandidate(
 
     if (error || !candidate) return null;
 
-    const { data: job } = await supabase
-      .from("jobs")
+    const { data: job } = await (supabase
+      .from("jobs") as any)
       .select("title")
       .eq("id", jobId)
       .single();
@@ -103,8 +110,8 @@ async function loadScorecard(
   if (!supabase) return null;
 
   try {
-    const { data } = await supabase
-      .from("scorecards")
+    const { data } = await (supabase
+      .from("scorecards") as any)
       .select(
         "overall_score, competency_scores, strengths, weaknesses, summary, language_report",
       )
@@ -122,8 +129,8 @@ async function loadTranscript(sessionId: string): Promise<Transcript | null> {
   if (!supabase) return null;
 
   try {
-    const { data } = await supabase
-      .from("transcripts")
+    const { data } = await (supabase
+      .from("transcripts") as any)
       .select("turns")
       .eq("session_id", sessionId)
       .maybeSingle();
@@ -141,8 +148,8 @@ async function loadProctoringEvents(
   if (!supabase) return [];
 
   try {
-    const { data } = await supabase
-      .from("proctoring_events")
+    const { data } = await (supabase
+      .from("proctoring_events") as any)
       .select("id, event_type, warning_number, severity, occurred_at")
       .eq("session_id", sessionId)
       .order("occurred_at", { ascending: true });
@@ -299,7 +306,7 @@ export default async function CandidateDetailPage({
               </Card>
 
               {/* Strengths & Gaps */}
-              <StrengthsGaps scorecard={scorecard} />
+              <StrengthsGaps scorecard={scorecard as any} />
             </>
           ) : (
             <Card>

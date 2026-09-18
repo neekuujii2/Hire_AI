@@ -137,7 +137,7 @@ export async function loadInviteContext(
 
   return {
     org: org as InviteOrg,
-    job: job as InviteJob,
+    job: job as unknown as InviteJob,
   };
 }
 
