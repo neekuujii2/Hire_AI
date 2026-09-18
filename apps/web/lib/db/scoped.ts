@@ -22,12 +22,12 @@ export async function getCurrentOrgId(): Promise<string | null> {
   const supabase = createServiceClient();
   if (!supabase) return null;
 
-  try {
+try {
     const { data } = await supabase
       .from("organizations")
       .select("id")
       .eq("clerk_org_id", clerkOrgId)
-      .single();
+      .maybeSingle();
 
     return data?.id ?? null;
   } catch {

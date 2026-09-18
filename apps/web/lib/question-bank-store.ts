@@ -32,15 +32,13 @@ export async function loadBank(
   supabase: SupabaseClient,
   jobId: string,
 ): Promise<BankLoadResult | null> {
-  const { data: job } = await supabase
-    .from("jobs")
+  const { data: job } = await (supabase.from("jobs") as any)
     .select("id,title,job_description")
     .eq("id", jobId)
     .maybeSingle();
   if (!job) return null;
 
-  const { data: bank } = await supabase
-    .from("question_banks")
+  const { data: bank } = await (supabase.from("question_banks") as any)
     .select("id,questions,rubric")
     .eq("job_id", jobId)
     .eq("is_active", true)
@@ -74,15 +72,13 @@ export async function saveBank(
   jobId: string,
   payload: QuestionBankPayload,
 ): Promise<{ ok: boolean; error?: string }> {
-  const { data: job } = await supabase
-    .from("jobs")
+  const { data: job } = await (supabase.from("jobs") as any)
     .select("id,org_id,title")
     .eq("id", jobId)
     .maybeSingle();
   if (!job) return { ok: false, error: "Job not found" };
 
-  const { data: existing } = await supabase
-    .from("question_banks")
+  const { data: existing } = await (supabase.from("question_banks") as any)
     .select("id")
     .eq("job_id", jobId)
     .eq("is_active", true)
@@ -91,8 +87,7 @@ export async function saveBank(
     .maybeSingle<{ id: string }>();
 
   if (existing) {
-    const { error } = await supabase
-      .from("question_banks")
+    const { error } = await (supabase.from("question_banks") as any)
       .update({
         questions: payload.questions,
         rubric: payload.rubric,
@@ -102,7 +97,7 @@ export async function saveBank(
     return { ok: true };
   }
 
-  const { error } = await supabase.from("question_banks").insert({
+  const { error } = await (supabase.from("question_banks") as any).insert({
     org_id: (job as { org_id: string }).org_id,
     job_id: jobId,
     name: `${(job as { title?: string }).title ?? "Job"} bank`,
@@ -118,8 +113,7 @@ export async function loadJobDescription(
   supabase: SupabaseClient,
   jobId: string,
 ): Promise<{ title: string; jd: string } | null> {
-  const { data: job } = await supabase
-    .from("jobs")
+  const { data: job } = await (supabase.from("jobs") as any)
     .select("id,title,job_description")
     .eq("id", jobId)
     .maybeSingle();

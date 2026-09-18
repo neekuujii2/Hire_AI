@@ -22,7 +22,7 @@ export async function GET(
   const { data, error } = await (supabase.from("question_banks") as any)
     .select("*")
     .eq("job_id", id)
-    .single();
+    .maybeSingle();
 
   if (error && error.code !== "PGRST116") {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

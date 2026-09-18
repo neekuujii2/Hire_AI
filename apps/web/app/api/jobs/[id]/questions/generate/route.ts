@@ -25,7 +25,7 @@ export async function POST(
   const { data: job, error: jobError } = await (supabase.from("jobs") as any)
     .select("id, title, job_description, org_id")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (jobError || !job) {
     return NextResponse.json({ ok: false, error: "Job not found." }, { status: 404 });
@@ -35,7 +35,7 @@ export async function POST(
   const { data: org } = await (supabase.from("organizations") as any)
     .select("name")
     .eq("id", job.org_id)
-    .single();
+    .maybeSingle();
 
   const companyName = org?.name ?? "the company";
   const jdText = job.job_description ?? job.title;

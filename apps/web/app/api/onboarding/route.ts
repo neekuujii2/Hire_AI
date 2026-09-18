@@ -73,7 +73,7 @@ export async function POST(request: Request) {
         { onConflict: "clerk_org_id" },
       )
       .select("id")
-      .single();
+      .maybeSingle();
 
     if (orgErr || !org) {
       return NextResponse.json(

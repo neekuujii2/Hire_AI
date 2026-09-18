@@ -22,7 +22,7 @@ export async function GET(
     .from("candidate_nps")
     .select("rating, nps_score, feedback_text, created_at")
     .eq("candidate_id", id)
-    .single();
+    .maybeSingle();
 
   return NextResponse.json({
     ok: true,
@@ -58,7 +58,7 @@ export async function POST(
     .from("candidate_nps")
     .select("id")
     .eq("candidate_id", id)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     return NextResponse.json({ ok: false, error: "Feedback already submitted." }, { status: 409 });

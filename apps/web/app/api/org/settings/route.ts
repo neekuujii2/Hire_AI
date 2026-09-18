@@ -19,11 +19,10 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: "Database not configured." }, { status: 503 });
   }
 
-  const { data, error } = await supabase
-    .from("org_configs")
+  const { data, error } = await (supabase.from("org_configs") as any)
     .select("*")
     .eq("org_id", orgId)
-    .single();
+    .maybeSingle();
 
   if (error && error.code !== "PGRST116") {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
@@ -65,7 +64,7 @@ export async function PATCH(request: Request) {
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = await supabase.from("org_configs").upsert(upsert, { onConflict: "org_id" });
+  const { error } = await (supabase.from("org_configs") as any).upsert(upsert, { onConflict: "org_id" });
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

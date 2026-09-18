@@ -67,7 +67,7 @@ export async function GET(
       .from("candidates")
       .select("name, email, created_at, job_id, session_id")
       .eq("id", candidateId)
-      .single();
+      .maybeSingle();
 
     if (candErr || !candidate) {
       return NextResponse.json(
@@ -83,7 +83,7 @@ export async function GET(
       .from("jobs")
       .select("title")
       .eq("id", cand.job_id)
-      .single();
+      .maybeSingle();
 
     const jobData = job as JobData | null;
 

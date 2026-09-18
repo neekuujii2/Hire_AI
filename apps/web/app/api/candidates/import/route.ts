@@ -50,8 +50,7 @@ export async function POST(request: Request) {
   }
 
   // Check for existing candidates in this job.
-  const { data: existing } = await supabase
-    .from("candidates")
+  const { data: existing } = await (supabase.from("candidates") as any)
     .select("email")
     .eq("job_id", body.job_id)
     .in(

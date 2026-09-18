@@ -125,22 +125,20 @@ async function handleOrganizationCreated(
       .replace(/^-|-$/g, "");
 
   // Upsert org (idempotent: webhook may retry).
-  const { data: org, error: orgErr } = await supabase
-    .from("organizations")
+  const { data: org, error: orgErr } = await (supabase.from("organizations") as any)
     .upsert(
       { clerk_org_id: clerkOrgId, name, slug },
       { onConflict: "clerk_org_id" },
     )
     .select("id")
-    .single();
+    .maybeSingle();
 
   if (orgErr || !org) {
     throw new Error(`Failed to create organization: ${orgErr?.message}`);
   }
 
   // Create default org config (idempotent).
-  await supabase
-    .from("org_configs")
+  await (supabase.from("org_configs") as any)
     .upsert({ org_id: org.id }, { onConflict: "org_id" });
 }
 
@@ -180,18 +178,17 @@ async function handleMembershipCreated(
   }
 
   // Resolve the org's internal ID.
-  const { data: org } = await supabase
-    .from("organizations")
+  const { data: org } = await (supabase.from("organizations") as any)
     .select("id")
     .eq("clerk_org_id", clerkOrgId)
-    .single();
+    .maybeSingle();
 
   if (!org) {
     throw new Error(`Organization not found for clerk_org_id: ${clerkOrgId}`);
   }
 
   // Upsert user (idempotent).
-  await supabase.from("users").upsert(
+  await (supabase.from("users") as any).upsert(
     {
       clerk_user_id: clerkUserId,
       org_id: org.id,

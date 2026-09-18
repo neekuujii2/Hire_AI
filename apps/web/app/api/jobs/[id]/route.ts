@@ -19,7 +19,7 @@ export async function GET(
       .from("jobs")
       .select("*")
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
     if (error || !job) {
       return NextResponse.json({ ok: false, error: "Job not found." }, { status: 404 });

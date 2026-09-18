@@ -37,8 +37,7 @@ export async function GET(request: Request) {
   const offset = parseInt(url.searchParams.get("offset") || "0");
 
   // Query candidates with scores via join.
-  let query = supabase
-    .from("candidates")
+  let query = (supabase.from("candidates") as any)
     .select(
       `
       id, name, email, pipeline_status, created_at, cv_url,

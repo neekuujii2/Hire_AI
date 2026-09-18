@@ -19,11 +19,10 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: "Database not configured." }, { status: 503 });
   }
 
-  const { data } = await supabase
-    .from("org_configs")
+  const { data } = await (supabase.from("org_configs") as any)
     .select("brand_color, welcome_message, thank_you_message")
     .eq("org_id", orgId)
-    .single();
+    .maybeSingle();
 
   return NextResponse.json({
     ok: true,
@@ -58,8 +57,7 @@ export async function PATCH(request: Request) {
   if (body.welcome_message !== undefined) update.welcome_message = body.welcome_message;
   if (body.thank_you_message !== undefined) update.thank_you_message = body.thank_you_message;
 
-  const { error } = await supabase
-    .from("org_configs")
+  const { error } = await (supabase.from("org_configs") as any)
     .upsert({ org_id: orgId, ...update }, { onConflict: "org_id" });
 
   if (error) {
