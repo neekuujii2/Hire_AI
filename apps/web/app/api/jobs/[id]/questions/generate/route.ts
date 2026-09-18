@@ -33,8 +33,7 @@ export async function POST(
   }
 
   // Fetch org config for company name.
-  const { data: org } = await supabase
-    .from("organizations")
+  const { data: org } = await (supabase.from("organizations") as any)
     .select("name")
     .eq("id", job.org_id)
     .single();
