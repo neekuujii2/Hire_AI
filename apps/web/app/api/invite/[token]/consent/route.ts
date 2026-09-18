@@ -86,7 +86,7 @@ export async function POST(
       );
     }
     const cv: CvPayload = body.cv;
-    const normalized = cv.content_type
+    const normalized = (cv as any).content_type
       .split(";", 1)[0]
       .trim()
       .toLowerCase();
