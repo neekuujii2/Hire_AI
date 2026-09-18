@@ -19,8 +19,7 @@ export async function GET(
     return NextResponse.json({ ok: false, error: "Database not configured." }, { status: 503 });
   }
 
-  const { data, error } = await supabase
-    .from("question_banks")
+  const { data, error } = await (supabase.from("question_banks") as any)
     .select("*")
     .eq("job_id", id)
     .single();
@@ -61,8 +60,7 @@ export async function PUT(
     updated_at: new Date().toISOString(),
   };
 
-  const { error } = await supabase
-    .from("question_banks")
+  const { error } = await (supabase.from("question_banks") as any)
     .upsert(upsert, { onConflict: "job_id" });
 
   if (error) {
