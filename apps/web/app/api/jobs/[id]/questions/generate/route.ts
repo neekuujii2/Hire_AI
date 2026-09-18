@@ -22,8 +22,7 @@ export async function POST(
   }
 
   // Fetch job details.
-  const { data: job, error: jobError } = await supabase
-    .from("jobs")
+  const { data: job, error: jobError } = await (supabase.from("jobs") as any)
     .select("id, title, job_description, org_id")
     .eq("id", id)
     .single();
