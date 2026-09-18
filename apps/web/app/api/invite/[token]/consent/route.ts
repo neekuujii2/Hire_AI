@@ -67,31 +67,30 @@ export async function POST(
 
   let cvPublicUrl: string | null = null;
 
-  if (body.cv) {
-    if (!payload.job.require_cv_upload) {
-      // CV provided but not required — accept and ignore.
-    } else if (!isR2Configured()) {
+  if (body.cv && payload.job.require_cv_upload) {
+    if (!isR2Configured()) {
       return NextResponse.json(
         { ok: false, error: "cv_upload_unavailable", cv_upload: "unavailable" },
         { status: 503 },
       );
-    } else {
-      const cv = body.cv as { filename: string; content_type: string; size: number };
-      const normalized = cv.content_type
-        .split(";", 1)[0]
-        .trim()
-        .toLowerCase();
-      if (!ALLOWED_CV_TYPES.has(normalized)) {
-        return NextResponse.json(
-          { ok: false, error: "Unsupported CV type. Upload a PDF or DOCX." },
-          { status: 415 },
-        );
-      }
-      const safeName = cv.filename.replace(/[/\\]/g, "_").slice(0, 100);
-      const key = `cvs/${payload.candidate.id}/${randomUUID()}-${safeName}`;
-      const signed = await presignUpload(key, normalized, cv.size);
-      cvPublicUrl = signed.publicUrl;
     }
+    const filename: string = body.cv.filename;
+    const contentType: string = body.cv.content_type;
+    const cvSize: number = body.cv.size;
+    const normalized = contentType
+      .split(";", 1)[0]
+      .trim()
+      .toLowerCase();
+    if (!ALLOWED_CV_TYPES.has(normalized)) {
+      return NextResponse.json(
+        { ok: false, error: "Unsupported CV type. Upload a PDF or DOCX." },
+        { status: 415 },
+      );
+    }
+    const safeName = filename.replace(/[/\\]/g, "_").slice(0, 100);
+    const key = `cvs/${payload.candidate.id}/${randomUUID()}-${safeName}`;
+    const signed = await presignUpload(key, normalized, cvSize);
+    cvPublicUrl = signed.publicUrl;
   }
 
   // Persist consent + CV reference; advance pipeline to interview_started.
