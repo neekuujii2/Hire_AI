@@ -76,7 +76,7 @@ export async function POST(
         { status: 503 },
       );
     } else {
-      const cv = body.cv!;
+      const cv = body.cv as { filename: string; content_type: string; size: number };
       const normalized = cv.content_type
         .split(";", 1)[0]
         .trim()
