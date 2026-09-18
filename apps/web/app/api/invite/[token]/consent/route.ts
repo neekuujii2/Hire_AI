@@ -5,6 +5,17 @@ import { resolveInvite, setPipelineStatus } from "@/lib/invite";
 import { isR2Configured } from "@/lib/env";
 import { presignUpload } from "@/lib/r2";
 
+interface CvPayload {
+  filename: string;
+  content_type: string;
+  size: number;
+}
+
+interface ConsentBody {
+  consent: boolean;
+  cv?: CvPayload;
+}
+
 const ConsentSchema = z.object({
   consent: z.literal(true),
   cv: z
@@ -39,9 +50,9 @@ export async function POST(
 ) {
   const { token } = await params;
 
-  let body: z.infer<typeof ConsentSchema>;
+  let body: ConsentBody;
   try {
-    body = ConsentSchema.parse(await request.json());
+    body = ConsentSchema.parse(await request.json()) as ConsentBody;
   } catch {
     return NextResponse.json(
       { ok: false, error: "Invalid consent payload" },
@@ -74,10 +85,8 @@ export async function POST(
         { status: 503 },
       );
     }
-    const filename: string = body.cv.filename;
-    const contentType: string = body.cv.content_type;
-    const cvSize: number = body.cv.size;
-    const normalized = contentType
+    const cv: CvPayload = body.cv;
+    const normalized = cv.content_type
       .split(";", 1)[0]
       .trim()
       .toLowerCase();
@@ -87,9 +96,9 @@ export async function POST(
         { status: 415 },
       );
     }
-    const safeName = filename.replace(/[/\\]/g, "_").slice(0, 100);
+    const safeName = cv.filename.replace(/[/\\]/g, "_").slice(0, 100);
     const key = `cvs/${payload.candidate.id}/${randomUUID()}-${safeName}`;
-    const signed = await presignUpload(key, normalized, cvSize);
+    const signed = await presignUpload(key, normalized, cv.size);
     cvPublicUrl = signed.publicUrl;
   }
 
