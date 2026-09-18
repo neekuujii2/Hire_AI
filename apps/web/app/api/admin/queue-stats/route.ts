@@ -79,8 +79,7 @@ export async function GET() {
     // Verify admin role.
     const supabase = createServiceClient();
     if (supabase) {
-      const { data: user } = await supabase
-        .from("users")
+      const { data: user } = await (supabase.from("users") as any)
         .select("role")
         .eq("clerk_user_id", userId)
         .maybeSingle();
