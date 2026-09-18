@@ -76,7 +76,7 @@ export async function POST(
         { status: 503 },
       );
     } else {
-      const normalized = body.cv.content_type
+      const normalized = (body.cv.content_type ?? "")
         .split(";", 1)[0]
         .trim()
         .toLowerCase();
