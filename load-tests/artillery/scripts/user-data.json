@@ -1,0 +1,17 @@
+[
+  {
+    "userId": "loadtest-user-001",
+    "role": "interviewer",
+    "skills": ["JavaScript", "Python", "React"]
+  },
+  {
+    "userId": "loadtest-user-002", 
+    "role": "candidate",
+    "skills": ["Node.js", "AWS", "Docker"]
+  },
+  {
+    "userId": "loadtest-user-003",
+    "role": "recruiter",
+    "skills": ["HR", "ATS", "Sourcing"]
+  }
+]

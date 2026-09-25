@@ -1,0 +1,157 @@
+config:
+  target: "ws://localhost:3000"  # Adjust to your WebSocket endpoint
+  phases:
+    - duration: 60
+      arrivalRate: 5  # Ramp up to 50 users over 60 seconds (5*60=300, but we'll limit with maxVUs)
+    - duration: 180
+      arrivalRate: 0
+      # Maintain 50 concurrent VUs for 3 minutes
+  maxVUs: 50
+  payload:
+    path: "scripts/user-data.json"  # External data file for varied test data
+  headers:
+    Content-Type: "application/json"
+    # Add authentication if needed
+    # Authorization: "Bearer {{ token }}"
+  # Environment variables
+  variables:
+    roomPrefix: "loadtest-room"
+    participantIdPrefix: "participant-"
+  # SSL configuration (if using wss://)
+  # ssl:
+  #   rejectUnauthorized: false
+  # Ensure we don't overwhelm the system
+  ensure:
+    p99: 500  # 99% of requests must be under 500ms
+    p95: 300  # 95% of requests must be under 300ms
+
+scenarios:
+  - name: "LiveKit connection and room interaction"
+    flow:
+      - function: "generateUniqueIds"
+      - log: "Starting session for {{ roomName }} with participant {{ participantId }}"
+      - think: 1
+      - websocket:
+          url: "ws://localhost:3000"
+          # Send initial connection message
+          send: |
+            {
+              "type": "connect",
+              "room": "{{ roomName }}",
+              "participantId": "{{ participantId }}",
+              "participantName": "Load Test User {{ participantId }}",
+              "metadata": "{ \"source\": \"load-test\", \"testRun\": \"{{ $timestamp }}\" }"
+            }
+          # Wait for connection acknowledgment
+          receive: |
+            {
+              "type": "connected",
+              "room": "{{ roomName }}",
+              "participantId": "{{ participantId }}"
+            }
+        # If we don't get connected within timeout, mark as failed
+        timeout: 5
+      - think: 1
+      - # Simulate joining the room and exchanging tokens
+      - websocket:
+          send: |
+            {
+              "type": "join-room",
+              "room": "{{ roomName }}",
+              "token": "{{ roomToken }}",
+              "participantId": "{{ participantId }}"
+            }
+          receive: |
+            {
+              "type": "joined-room",
+              "room": "{{ roomName }}",
+              "participantId": "{{ participantId }}",
+              "success": true
+            }
+        timeout: 3
+      - think: 2
+      - # Simulate some interaction (sending a message or signal)
+      - websocket:
+          send: |
+            {
+              "type": "send-signal",
+              "room": "{{ roomName }}",
+              "participantId": "{{ participantId }}",
+              "data": "{ \"type\": \"chat\", \"message\": \"Hello from load test user {{ participantId }}\" }"
+            }
+          receive: |
+            {
+              "type": "signal-received",
+              "room": "{{ roomName }}",
+              "fromParticipantId": "{{ participantId }}",
+              "success": true
+            }
+        timeout: 2
+      - think: 1
+      - # Leave room gracefully
+      - websocket:
+          send: |
+            {
+              "type": "leave-room",
+              "room": "{{ roomName }}",
+              "participantId": "{{ participantId }}"
+            }
+          receive: |
+            {
+              "type": "left-room",
+              "room": "{{ roomName }}",
+              "participantId": "{{ participantId }}",
+              "success": true
+            }
+        timeout: 2
+      - think: 1
+      - # Close WebSocket connection
+      - websocket:
+          close: true
+      - log: "Completed session for {{ roomName }}"
+
+# Functions for generating dynamic data
+before:
+  - function: "initializeTestData"
+
+functions:
+  initializeTestData: |
+    // Generate a pool of room names and tokens for the test
+    const roomCount = 10;  // We'll cycle through these rooms
+    const rooms = [];
+    for (let i = 0; i < roomCount; i++) {
+      rooms.push({
+        roomName: `__VU__room_${i}_${Date.now()}`,
+        // In a real scenario, you'd generate actual LiveKit tokens here
+        // For load testing, we'll use a placeholder or mock validation
+        roomToken: `mock-token-room-${i}-__VU__-${Math.random().toString(36).substr(2, 9)}`
+      });
+    }
+    // Store in global scope for VUs to access
+    __GLOBAL.testRooms = rooms;
+
+  generateUniqueIds: |
+    // Each VU gets a unique room and participant ID
+    const vuId = __VU;
+    const iteration = __ITER;
+    
+    // Select room based on VU ID to distribute load
+    const roomIndex = vuId % __GLOBAL.testRooms.length;
+    const selectedRoom = __GLOBAL.testRooms[roomIndex];
+    
+    // Generate unique participant ID for this iteration
+    const participantId = `${selectedRoom.roomName}-part-${vuId}-${iteration}`;
+    
+    // Set variables for this VU's scenario
+    __VU.roomName = selectedRoom.roomName;
+    __VU.participantId = participantId;
+    __VU.roomToken = selectedRoom.roomToken;
+
+# WebSocket specific configurations
+websocket:
+  # Heartbeat to keep connections alive
+  heartbeat: 10
+  # Maximum message size
+  maxMessageSize: 1048576  # 1MB
+  # Reconnection settings
+  reconnect: false  # Don't automatically reconnect in load test

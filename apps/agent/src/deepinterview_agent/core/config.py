@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     # the exact id + structured-output support before wiring billing (project
     # golden rule #6). Env-overridable via OPENAI_MODEL.
     openai_model: str = "gpt-5.1-mini"
+    # CV parsing model — GPT-4o-mini for cost‑effective structured extraction.
+    # Override via CV_PARSER_MODEL.
+    cv_parser_model: str = "gpt-4o-mini"
+    # Screening model for resume evaluation — GPT-4o for structured output quality.
+    # Override via SCREENING_MODEL.
+    screening_model: str = "gpt-4o"
     # ElevenLabs TTS model — the low-latency multilingual voice for languages
     # Cartesia can't speak (e.g. Vietnamese). eleven_flash_v2_5 is ~75ms-latency
     # and covers 32 languages incl. vi. Override via ELEVENLABS_MODEL.
