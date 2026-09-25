@@ -1,345 +1,98 @@
 /**
- * HireAI Metrics - Datadog/OpenTelemetry metrics wrapper.
+ * Custom metrics for HireAI.
  *
- * Usage:
- *   import { recordMetric, histogram, gauge } from "@/lib/monitoring/metrics";
- *   histogram("interview.prep.duration_ms", durationMs, { session_id, org_id });
- *   gauge("queue.depth", waitingJobs);
- *
- * Providers:
- *   - Datadog: Set DATADOG_API_KEY (HTTP API v2 series endpoint)
- *   - OpenTelemetry: Set OTEL_EXPORTER_OTLP_ENDPOINT (auto-detected via @opentelemetry/sdk-metrics)
- *   - Fallback: Console logger (no-ops, aggregates in memory)
- *
- * This module is gated: with no telemetry configured, it remains a no-op.
- * No external dependencies are required.
+ * Uses Datadog if DATADOG_API_KEY is configured; otherwise falls back to
+ * OpenTelemetry. Both paths are lazy-loaded so the module imports cleanly
+ * even when neither SDK is installed.
  */
 
-type MetricType = "counter" | "gauge" | "histogram" | "distribution";
+export type MetricType = "counter" | "histogram" | "gauge";
 
-type Tags = Record<string, string | number | boolean>;
-
-type MetricRecord = {
+export interface MetricEvent {
   name: string;
-  value: number;
   type: MetricType;
-  tags?: Tags;
-  unit?: string;
-};
-
-type Provider = {
-  record: (m: MetricRecord) => void | Promise<void>;
-  flush?: () => Promise<void>;
-  shutdown?: () => Promise<void>;
-};
-
-const METRICS_BUFFER: MetricRecord[] = [];
-const BATCH_INTERVAL_MS = 5_000;
-let flushTimer: ReturnType<typeof setInterval> | null = null;
-let provider: Provider | null = null;
-let isInitialized = false;
-
-function getDatadogApiKey(): string | undefined {
-  if (typeof process.env !== "undefined") {
-    return process.env.DATADOG_API_KEY;
-  }
-  return undefined;
+  value: number;
+  tags?: Record<string, string>;
 }
 
-function getOtelEndpoint(): string | undefined {
-  if (typeof process.env !== "undefined") {
-    return (
-      process.env.OTEL_EXPORTER_OTLP_ENDPOINT ??
-      process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-    );
-  }
-  return undefined;
-}
+const _buffer: MetricEvent[] = [];
+let _flushTimer: ReturnType<typeof setInterval> | null = null;
 
-function hasDatadogConfigured(): boolean {
-  return Boolean(getDatadogApiKey());
-}
+/** Send metrics to Datadog (if configured) or OpenTelemetry. */
+async function _flush() {
+  if (_buffer.length === 0) return;
+  const events = _buffer.splice(0, _buffer.length);
 
-function hasOtelConfigured(): boolean {
-  return Boolean(getOtelEndpoint());
-}
-
-class DatadogProvider implements Provider {
-  private apiKey: string;
-  private endpoint = "https://api.datadoghq.com/api/v2/series";
-
-  constructor() {
-    this.apiKey = getDatadogApiKey()!;
-  }
-
-  record(m: MetricRecord): void {
-    const series: Record<string, unknown> = {
-      metric: m.name,
-      type: this.mapMetricType(m.type),
-      points: [[Math.floor(Date.now() / 1000), m.value]],
-      tags: m.tags ? Object.entries(m.tags).map(([k, v]) => `${k}:${v}`) : [],
-      unit: m.unit,
-    };
-
-    fetch(this.endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "DD-API-KEY": this.apiKey,
-      },
-      body: JSON.stringify({ series: [series] }),
-    }).catch((e) => console.error("[metrics] Datadog send failed:", e));
-  }
-
-  private mapMetricType(type: MetricType): "gauge" | "count" | "distribution" {
-    if (type === "histogram" || type === "distribution") {
-      return "distribution";
-    }
-    if (type === "gauge") return "gauge";
-    return "count";
-  }
-
-  async flush(): Promise<void> {
-    await Promise.all(METRICS_BUFFER.map((m) => Promise.resolve(this.record(m))));
-    METRICS_BUFFER.length = 0;
-  }
-}
-
-class OpenTelemetryProvider implements Provider {
-  async record(m: MetricRecord): Promise<void> {
+  // Datadog path
+  if (process.env.DATADOG_API_KEY) {
     try {
-      const { MeterProvider } = await import("@opentelemetry/sdk-metrics");
-      const { OTLPMetricExporter } = await import(
-        "@opentelemetry/exporter-trace-otlp-http"
-      );
-
-      const exporter = new OTLPMetricExporter({
-        url: getOtelEndpoint()!.replace("/v1/traces", "/v1/metrics"),
-      });
-
-      const meterProvider = new MeterProvider({
-        exporters: [exporter],
-      });
-
-      const meter = meterProvider.getMeter("hireai-web");
-
-      switch (m.type) {
-        case "counter": {
-          const counter = meter.createCounter(m.name);
-          counter.add(m.value, m.tags);
-          break;
-        }
-        case "gauge": {
-          const gauge = meter.createUpDownCounter(m.name);
-          gauge.add(m.value, m.tags);
-          break;
-        }
-        case "histogram":
-        case "distribution": {
-          const histogram = meter.createHistogram(m.name);
-          histogram.record(m.value, m.tags);
-          break;
-        }
+      const { sendMetric } = await import("@datadog/datadog");
+      for (const e of events) {
+        sendMetric(e.name, e.value, e.type, e.tags);
       }
+    } catch { /* ignore */ }
+  }
 
-      await meterProvider.forceFlush();
-    } catch {
-      // OpenTelemetry not installed or failed to initialize
-    }
+  // OpenTelemetry fallback
+  if (!process.env.DATADOG_API_KEY) {
+    try {
+      const { metrics } = await import("@opentelemetry/api");
+      const meter = metrics.getMeter("hireai");
+      for (const e of events) {
+        const counter = meter.createCounter(e.name);
+        counter.add(e.value, e.tags);
+      }
+    } catch { /* ignore */ }
   }
 }
 
-class ConsoleProvider implements Provider {
-  record(m: MetricRecord): void {
-    console.debug("[metrics]", `${m.name} ${m.value}`, m.tags);
-  }
-}
-
-async function initProvider(): Promise<Provider> {
-  if (hasDatadogConfigured()) {
-    return new DatadogProvider();
-  }
-  if (hasOtelConfigured()) {
-    return new OpenTelemetryProvider();
-  }
-  return new ConsoleProvider();
-}
-
-async function ensureProvider(): Promise<Provider> {
-  if (!isInitialized) {
-    provider = await initProvider();
-    isInitialized = true;
-
-    if (typeof setInterval !== "undefined") {
-      flushTimer = setInterval(async () => {
-        if (METRICS_BUFFER.length > 0 && provider) {
-          try {
-            await provider.flush?.();
-          } catch {
-            // ignore flush errors
-          }
-        }
-      }, BATCH_INTERVAL_MS);
-    }
-
-    process.on("SIGTERM", () => provider?.shutdown?.());
-    process.on("SIGINT", () => provider?.shutdown?.());
-  }
-  return provider!;
-}
-
-/**
- * Flush buffered metrics manually (useful in tests or at shutdown).
- */
-export async function flushMetrics(): Promise<void> {
-  const p = provider;
-  if (p && METRICS_BUFFER.length > 0) {
-    await p.flush?.();
-    METRICS_BUFFER.length = 0;
-  }
-}
-
-/**
- * Release resources and cancel background flush timer.
- */
-export async function shutdownMetrics(): Promise<void> {
-  if (flushTimer) {
-    clearInterval(flushTimer);
-    flushTimer = null;
-  }
-  await flushMetrics();
-  await provider?.shutdown?.();
-}
-
-/**
- * Record a generic metric.
- * @param name - Metric name
- * @param value - Numeric value
- * @param tags - Optional key-value tags for dimensionality
- * @param type - Metric type (default: counter)
- * @param unit - Optional unit (seconds, bytes, ms, etc.)
- */
-export async function recordMetric(
+export function recordMetric(
   name: string,
   value: number,
-  options?: {
-    tags?: Tags;
-    type?: MetricType;
-    unit?: string;
-  },
-): Promise<void> {
-  const m: MetricRecord = {
-    name,
-    value,
-    type: options?.type ?? "counter",
-    tags: options?.tags,
-    unit: options?.unit,
-  };
-
-  const p = await ensureProvider();
-  try {
-    await p.record(m);
-  } catch (e) {
-    console.error("[metrics] record failed:", e);
+  type: MetricType = "counter",
+  tags?: Record<string, string>,
+) {
+  _buffer.push({ name, type, value, tags });
+  if (!_flushTimer) {
+    _flushTimer = setInterval(_flush, 5000);
   }
 }
 
-/**
- * Record a counter/increment metric.
- * @param name - Metric name
- * @param delta - Value to add (default: 1)
- * @param tags - Optional key-value tags
- */
-export async function counter(
-  name: string,
-  delta = 1,
-  tags?: Tags,
-): Promise<void> {
-  await recordMetric(name, delta, { tags, type: "counter" });
+export function histogram(name: string, value: number, tags?: Record<string, string>) {
+  recordMetric(name, value, "histogram", tags);
 }
 
-/**
- * Record a histogram (distribution) metric.
- * Used for latency, duration, size distributions.
- * @param name - Metric name (should end in _ms or _ms or _sec if using units)
- * @param value - The observed value
- * @param tags - Optional key-value tags
- * @param unit - Unit (default: "ms" for latency)
- */
-export async function histogram(
-  name: string,
-  value: number,
-  tags?: Tags,
-  unit = "ms",
-): Promise<void> {
-  await recordMetric(name, value, { tags, type: "histogram", unit });
+export function gauge(name: string, value: number, tags?: Record<string, string>) {
+  recordMetric(name, value, "gauge", tags);
 }
 
-/**
- * Record a gauge metric.
- * Used for instantaneous values like queue depth, connection counts.
- * @param name - Metric name
- * @param value - Current value
- * @param tags - Optional key-value tags
- */
-export async function gauge(name: string, value: number, tags?: Tags): Promise<void> {
-  await recordMetric(name, value, { tags, type: "gauge" });
+export function counter(name: string, value: number = 1, tags?: Record<string, string>) {
+  recordMetric(name, value, "counter", tags);
 }
 
-/**
- * Track interview session lifecycle events.
- */
-export const InterviewMetrics = {
-  sessionCreated: (sessionId: string, orgId: string) =>
-    counter("interview.session.created", 1, { session_id: sessionId, org_id: orgId }),
+// --- Pre-defined metric helpers ---
 
-  sessionCompleted: (sessionId: string, orgId: string, durationMs: number) => {
-    counter("interview.session.completed", 1, { session_id: sessionId, org_id: orgId });
-    histogram("interview.session.duration_ms", durationMs, {
-      session_id: sessionId,
-      org_id: orgId,
-    });
-  },
-
-  sessionTerminatedProctor: (sessionId: string, orgId: string, reason: string) =>
-    counter("interview.session.terminated_proctor", 1, {
-      session_id: sessionId,
-      org_id: orgId,
-      reason,
-    }),
-
-  prepDuration: (sessionId: string, durationMs: number) =>
-    histogram("interview.prep.duration_ms", durationMs, { session_id: sessionId }),
-
-  voiceTurnLatency: (sessionId: string, latencyMs: number) =>
-    histogram("interview.voice.turn_latency_ms", latencyMs, { session_id: sessionId }),
-
-  applicationSubmitted: (appId: string, orgId: string) =>
-    counter("application.submitted", 1, { app_id: appId, org_id: orgId }),
-
-  aiScore: (appId: string, score: number) =>
-    histogram("application.ai_score", score, { app_id: appId }),
+export const metrics = {
+  sessionCreated: (orgId: string, jobId: string) =>
+    counter("interview.session.created", 1, { org_id: orgId, job_id: jobId }),
+  sessionCompleted: (orgId: string, durationSeconds: number) =>
+    counter("interview.session.completed", 1, { org_id: orgId, duration_seconds: String(durationSeconds) }),
+  sessionTerminatedProctor: (orgId: string, reason: string) =>
+    counter("interview.session.terminated_proctor", 1, { org_id: orgId, reason }),
+  prepDuration: (ms: number, orgId: string) =>
+    histogram("interview.prep.duration_ms", ms, { org_id: orgId }),
+  voiceTurnLatency: (ms: number, orgId: string) =>
+    histogram("interview.voice.turn_latency_ms", ms, { org_id: orgId }),
+  applicationSubmitted: (orgId: string, source: string) =>
+    counter("application.submitted", 1, { org_id: orgId, source }),
+  applicationAiScore: (score: number, orgId: string) =>
+    histogram("application.ai_score", score, { org_id: orgId }),
+  queueDepth: (queue: string, depth: number) =>
+    gauge("queue.depth", depth, { queue_name: queue }),
+  emailSent: (template: string) =>
+    counter("email.sent", 1, { template_name: template }),
+  emailFailed: (template: string) =>
+    counter("email.failed", 1, { template_name: template }),
 };
 
-/**
- * Queue depth gauges for BullMQ queues.
- */
-export const QueueMetrics = {
-  depth: async (queueName: string, counts: { waiting: number; active: number }) => {
-    await gauge(`queue.${queueName}.depth`, counts.waiting);
-    await gauge(`queue.${queueName}.active`, counts.active);
-  },
-};
-
-/**
- * Email metrics.
- */
-export const EmailMetrics = {
-  sent: (recipient: string, orgId: string) =>
-    counter("email.sent", 1, { recipient, org_id: orgId }),
-
-  failed: (error: string, orgId: string) =>
-    counter("email.failed", 1, { error, org_id: orgId }),
-};
-
-export type { MetricRecord, Tags, MetricType };
+export default metrics;

@@ -1,7 +1,21 @@
 import { getOrgBySlug, getPublishedJobs } from "@/lib/careers";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+
+function timeAgo(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay > 30) return `${Math.floor(diffDay / 30)} month${Math.floor(diffDay / 30) > 1 ? "s" : ""} ago`;
+  if (diffDay > 0) return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
+  if (diffHr > 0) return `${diffHr} hour${diffHr > 1 ? "s" : ""} ago`;
+  if (diffMin > 0) return `${diffMin} minute${diffMin > 1 ? "s" : ""} ago`;
+  return "just now";
+}
 
 export default async function CareersPage({
   searchParams,
@@ -43,7 +57,7 @@ export default async function CareersPage({
                 <span>{job.location_type}</span>
               </div>
               <p className="text-xs text-gray-400 mt-4">
-                Posted {formatDistanceToNow(new Date(job.created_at))} ago
+                Posted {timeAgo(job.created_at)}
               </p>
             </Link>
           ))}
